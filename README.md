@@ -1,4 +1,5 @@
-#UniRep, a mLSTM "babbler" deep representation learner for protein engineering informatics.
+# UniRep, a mLSTM "babbler" deep representation learner for protein engineering informatics.
+
 We present an interface for training, inferencing reprepresentations, generative modelling aka "babbling", and data management. All three architectures (64, 256, and 1900 units) are provided along with the trained architectures, random initializations used for evotuning (to ensure reproducibility) and the evotuned parameters.
 
 - unirep_tutorial_64_unit.ipynb Start here for information about installation and usage of the babbler interface. unirep_tutorial.ipynb uses the full-sized model which should only be run on a workstation with a more than 16G of RAM. 
