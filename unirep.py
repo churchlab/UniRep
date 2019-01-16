@@ -246,15 +246,15 @@ class mLSTMCellStackNPY(tf.nn.rnn_cell.RNNCell):
             wn=self._wn,
             scope=self._scope + str(i),
             var_device=self._var_device,
-            wx_init=np.load(join(bs + f"{i}_mlstm_stack{i}_wx:0.npy")),
-            wh_init=np.load(join(bs + f"{i}_mlstm_stack{i}_wh:0.npy")),
-            wmx_init=np.load(join(bs + f"{i}_mlstm_stack{i}_wmx:0.npy")),
-            wmh_init=np.load(join(bs + f"{i}_mlstm_stack{i}_wmh:0.npy")),
-            b_init=np.load(join(bs + f"{i}_mlstm_stack{i}_b:0.npy")),
-            gx_init=np.load(join(bs + f"{i}_mlstm_stack{i}_gx:0.npy")),
-            gh_init=np.load(join(bs + f"{i}_mlstm_stack{i}_gh:0.npy")),
-            gmx_init=np.load(join(bs + f"{i}_mlstm_stack{i}_gmx:0.npy")),
-            gmh_init=np.load(join(bs + f"{i}_mlstm_stack{i}_gmh:0.npy"))      
+            wx_init=np.load(join(bs + "{0}_mlstm_stack{1}_wx:0.npy".format(i,i))),
+            wh_init=np.load(join(bs + "{0}_mlstm_stack{1}_wh:0.npy".format(i,i))),
+            wmx_init=np.load(join(bs + "{0}_mlstm_stack{1}_wmx:0.npy".format(i,i))),
+            wmh_init=np.load(join(bs + "{0}_mlstm_stack{1}_wmh:0.npy".format(i,i))),
+            b_init=np.load(join(bs + "{0}_mlstm_stack{1}_b:0.npy".format(i,i))),
+            gx_init=np.load(join(bs + "{0}_mlstm_stack{1}_gx:0.npy".format(i,i))),
+            gh_init=np.load(join(bs + "{0}_mlstm_stack{1}_gh:0.npy".format(i,i))),
+            gmx_init=np.load(join(bs + "{0}_mlstm_stack{1}_gmx:0.npy".format(i,i))),
+            gmh_init=np.load(join(bs + "{0}_mlstm_stack{1}_gmh:0.npy".format(i,i)))      
                  ) for i in range(self._num_layers)]
         if self._dropout:
             layers = [

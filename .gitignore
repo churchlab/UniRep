@@ -1,3 +1,13 @@
+# Repo specific data folders
+64_weights/
+64_predict_42_weights/
+64_weights_random/
+256_weights/
+256_weights_random/
+1900_weights/
+1900_weights_random/
+evotuned/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
