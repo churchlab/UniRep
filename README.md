@@ -7,9 +7,13 @@ We present an interface for training, inferencing reprepresentations, generative
 First clone or fork this repository. We recommend developing with docker.
 
 ### CPU-only support
+0. You will need to install [docker](https://www.docker.com/why-docker) to get started.
 1. Build docker: `docker build -f docker/Dockerfile.cpu -t unirep-cpu .` This step pulls the Tensorflow 1.3 CPU image and installs a few required python packages.
 2. Run docker: `docker/run_cpu_docker.sh`. This will launch Jupyter. Copy and paste the provided URL into your browser. Note that if you are running this code on a remote machine you will need to set up port forwarding between your local machine and your remote machine. See this [example](https://coderwall.com/p/ohk6cg/remote-access-to-ipython-notebooks-via-ssh) (note that in our case jupyter is serving port 8888, not 8889 as the example describes).
-3. 
+3. Open up the `unirep_tutorial_64_unit.ipynb` or `unirep_tutorial.ipynb` notebooks and get started. The 64-unit model should be OK to run on any machine. The full-sized model used in `unirep_tutorial.ipynb` will require a machine with more than 16GB of RAM.
+
+### GPU support
+0. 
 
 - unirep_tutorial_64_unit.ipynb Start here for information about installation and usage of the babbler interface. unirep_tutorial.ipynb uses the full-sized model which should only be run on a workstation with a more than 16G of RAM. 
 - unirep.py Interface for most use cases.
