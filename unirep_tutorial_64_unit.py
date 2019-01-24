@@ -126,7 +126,8 @@ print(batch.shape)
 # In[11]:
 
 
-final_hidden, x_placeholder, batch_size_placeholder, seq_length_placeholder, initial_state_placeholder = b.get_rep_ops()
+final_hidden, x_placeholder, batch_size_placeholder, seq_length_placeholder, initial_state_placeholder = (
+    b.get_rep_ops())
 
 
 # In[12]:

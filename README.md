@@ -2,6 +2,15 @@
 
 We present an interface for training, inferencing reprepresentations, generative modelling aka "babbling", and data management. All three architectures (64, 256, and 1900 units) are provided along with the trained architectures, random initializations used for evotuning (to ensure reproducibility) and the evotuned parameters.
 
+## Quick-start
+
+First clone or fork this repository. We recommend developing with docker.
+
+### CPU-only support
+1. Build docker: `docker build -f docker/Dockerfile.cpu -t unirep-cpu .` This step pulls the Tensorflow 1.3 CPU image and installs a few required python packages.
+2. Run docker: `docker/run_cpu_docker.sh`. This will launch Jupyter. Copy and paste the provided URL into your browser. Note that if you are running this code on a remote machine you will need to set up port forwarding between your local machine and your remote machine. See this [example](https://coderwall.com/p/ohk6cg/remote-access-to-ipython-notebooks-via-ssh) (note that in our case jupyter is serving port 8888, not 8889 as the example describes).
+3. 
+
 - unirep_tutorial_64_unit.ipynb Start here for information about installation and usage of the babbler interface. unirep_tutorial.ipynb uses the full-sized model which should only be run on a workstation with a more than 16G of RAM. 
 - unirep.py Interface for most use cases.
 - custom_models.py Custom implementations of GRU, LSTM and mLSTM cells as used in representation training on UniRef50
