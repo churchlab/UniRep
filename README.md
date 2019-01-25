@@ -40,6 +40,7 @@ where `<weights_dir>` is one of:
 
 ### Description of files in this repository
 - unirep_tutorial.ipynb - Start here for examples on loading the model, preparing data, training, and running inference. 
+- unirep_tutorial.py - A pure python script version of the tutorial notebook.
 - unirep.py - Interface for most use cases.
 - custom_models.py -  Custom implementations of GRU, LSTM and mLSTM cells as used in representation training on UniRef50
 - data_utils.py - Convenience functions for data management.
