@@ -16,7 +16,7 @@
 # In[1]:
 
 
-USE_FULL_1900_DIM_MODEL = False # if True use 1900 dimensional model, else use 64 dimensional one.
+USE_FULL_1900_DIM_MODEL = True # if True use 1900 dimensional model, else use 64 dimensional one.
 
 
 # ## Setup
@@ -87,7 +87,7 @@ b.is_valid_seq(seq)
 
 # If you are into it, you could do your own data flow as long as you ensure that the data format is obeyed. Alternatively, you could use the data flow we implemented for babbler training, which happens in the tensorflow graph. It reads from a file of integer sequences, shuffles them around, collects them into groups of similar length (to minimize padding waste) and pads them to the max_length. We'll show you how to do that below:
 
-# In[7]:
+# In[8]:
 
 
 # Before you can train your model, sequences need to be saved in the correct format
@@ -96,15 +96,16 @@ with open("seqs.txt", "r") as source:
     with open("formatted.txt", "w") as destination:
         for i,seq in enumerate(source):
             seq = seq.strip()
-            if b.is_valid_seq(seq):
+            if b.is_valid_seq(seq) and len(seq) < 275: ### PATCH ###
                 formatted = ",".join(map(str,b.format_seq(seq)))
                 destination.write(formatted)
                 destination.write('\n')
             else:
-                raise ValueError("Sequence {0} is not a valid sequence.".format(i))
+                pass
+                #raise ValueError("Sequence {0} is not a valid sequence.".format(i)) ### PATCH ### 
 
 
-# In[8]:
+# In[9]:
 
 
 # This is what the integer format looks like
@@ -124,7 +125,7 @@ get_ipython().system('head -n1 formatted.txt')
 # - Automatically padding the sequences with zeros so the returned batch is a perfect rectangle
 # - Automatically repeating the dataset (you will need synthetic epochs)
 
-# In[9]:
+# In[10]:
 
 
 bucket_op = b.bucket_batch_pad("formatted.txt", interval=1000) # Large interval
@@ -132,7 +133,7 @@ bucket_op = b.bucket_batch_pad("formatted.txt", interval=1000) # Large interval
 
 # Inconveniently, this does not make it easy for a value to be associated with each sequence and not lost during shuffling. You can get around this by just prepending every integer sequence with the sequence label (eg, every sequence would be saved to the file as "{brightness value}, 24, 1, 5,..." and then you could just index out the first column after calling the bucket_op. Please reach out if you have questions on how to do this.
 
-# In[10]:
+# In[11]:
 
 
 # Now that we have the bucket_op, we can simply sess.run() it to get
@@ -150,14 +151,14 @@ print(batch.shape)
 
 # ## Training a top model and a top model + mLSTM.
 
-# In[11]:
+# In[12]:
 
 
 final_hidden, x_placeholder, batch_size_placeholder, seq_length_placeholder, initial_state_placeholder = (
     b.get_rep_ops())
 
 
-# In[12]:
+# In[13]:
 
 
 # final_hidden should be a batch_size x rep_dim matrix
@@ -183,7 +184,7 @@ top_only_step_op = optimizer.minimize(loss, var_list=top_variables)
 all_step_op = optimizer.minimize(loss)
 
 
-# In[13]:
+# In[14]:
 
 
 # Notice that one of the placeholder is seq_length_placeholder.
@@ -197,7 +198,7 @@ def nonpad_len(batch):
 nonpad_len(batch)
 
 
-# In[14]:
+# In[15]:
 
 
 # toy example where we learn to predict 42 just training the top
@@ -222,7 +223,7 @@ with tf.Session() as sess:
 
 # Below we train both a top model and the mLSTM. This won't work on a 16G RAM laptop. Joint recurrent/ top model training has been tested on p3.2xlarge, which has 16G of GPU RAM and 64G of system RAM. To see a demonstration of joint training on your laptop, please run  unirep_tutorial_64_unit.ipynb, which is the same architecture and interface except for 64 hidden units in 4 stacked layers.
 
-# In[15]:
+# In[16]:
 
 
 y = [[42]]*batch_size
