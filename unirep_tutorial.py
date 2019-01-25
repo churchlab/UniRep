@@ -1,17 +1,11 @@
 
 # coding: utf-8
 
-# ## How to use the UniRep mLSTM "babbler". This version demonstrates the 1900-unit architecture. On a laptop, unirep_tutorial_64.ipynb will be more RAM friendly.
+# ## How to use the UniRep mLSTM "babbler". This version demonstrates the 64-unit and the 1900-unit architecture. 
+# 
+# We recommend getting started with the 64-unit architecture as it is easier and faster to run, but has the same interface as the 1900-unit one.
 
-# First, install the environment with your preferred method. We have tested the .yml conda load method on a conda python installation in Ubuntu 15.04, but not the others. We used pip to dump to requirements.txt which should be compatible with virtual env if you use python 3.6. 
-# 
-# To install something probably close enough to this environment you can use conda as follows:
-# ```
-# conda create -n unirep python=3.6.0 tensorflow=1.3.0 jupyter pandas
-# source activate unirep
-# ```
-# 
-# The most important version requirement is **tensorflow 1.3.0**. The others are likely fungible.
+# Use the 64-unit or the 1900-unit model?
 
 # In[1]:
 
@@ -85,13 +79,14 @@ np.array(b.format_seq(seq))
 b.is_valid_seq(seq)
 
 
-# If you are into it, you could do your own data flow as long as you ensure that the data format is obeyed. Alternatively, you could use the data flow we implemented for babbler training, which happens in the tensorflow graph. It reads from a file of integer sequences, shuffles them around, collects them into groups of similar length (to minimize padding waste) and pads them to the max_length. We'll show you how to do that below:
+# You could use your own data flow as long as you ensure that the data format is obeyed. Alternatively, you can use the data flow we've implemented for babbler training, which happens in the tensorflow graph. It reads from a file of integer sequences, shuffles them around, collects them into groups of similar length (to minimize padding waste) and pads them to the max_length. Here's how to do that:
 
-# In[8]:
+# First, sequences need to be saved in the correct format. Suppose we have a new-line seperated file of amino acid sequences, seqs.txt, and we want to format them. This can be done like so
+
+# In[7]:
 
 
-# Before you can train your model, sequences need to be saved in the correct format
-# suppose we have a new-line seperated file of AA sequences, seqs.txt, and we want to format them.
+# Before you can train your model, 
 with open("seqs.txt", "r") as source:
     with open("formatted.txt", "w") as destination:
         for i,seq in enumerate(source):
@@ -105,39 +100,38 @@ with open("seqs.txt", "r") as source:
                 #raise ValueError("Sequence {0} is not a valid sequence.".format(i)) ### PATCH ### 
 
 
-# In[9]:
-
-
 # This is what the integer format looks like
+
+# In[8]:
+
+
 get_ipython().system('head -n1 formatted.txt')
 
 
 # Notice that by default format_seq does not include the stop symbol (25) at the end of the sequence. This is the correct behavior if you are trying to train a top model, but not if you are training a babbler.
 
-# Now we can use my custom function to bucket, batch and pad sequences  from formatted.txt (which has the correct integer codex after calling)
-# babbler.format_seq(). The bucketing occurs in the graph. 
+# Now we can use a custom function to bucket, batch and pad sequences from formatted.txt (which has the correct integer codex after calling `babbler.format_seq()`). The bucketing occurs in the graph. 
 # 
-# What is bucketing? Specify a lower and upper bound, and interval. All sequences less than lower or greater than upper will be batched together. Interval defines the "sides" of buckets between these bounds. Don't pick a small interval for a small dataset because
-# the function will just repeat a sequence if there are not enough to
+# What is bucketing? Specify a lower and upper bound, and interval. All sequences less than lower or greater than upper will be batched together. The interval defines the "sides" of buckets between these bounds. Don't pick a small interval for a small dataset because the function will just repeat a sequence if there are not enough to
 # fill a batch. All batches are the size you passed when initializing the babbler.
-# What else is this doing? 
-# - Shuffling the sequences by randomly sampling from a 10000 sequence buffer
+# 
+# This is also doing a few other things:
+# - Shuffling the sequences by randomly sampling from a 10000 sequence buffer <span style="color:red">## Confirming 10K number is correct? ##</span>
 # - Automatically padding the sequences with zeros so the returned batch is a perfect rectangle
-# - Automatically repeating the dataset (you will need synthetic epochs)
+# - Automatically repeating the dataset
 
-# In[10]:
+# In[9]:
 
 
 bucket_op = b.bucket_batch_pad("formatted.txt", interval=1000) # Large interval
 
 
-# Inconveniently, this does not make it easy for a value to be associated with each sequence and not lost during shuffling. You can get around this by just prepending every integer sequence with the sequence label (eg, every sequence would be saved to the file as "{brightness value}, 24, 1, 5,..." and then you could just index out the first column after calling the bucket_op. Please reach out if you have questions on how to do this.
+# Inconveniently, this does not make it easy for a value to be associated with each sequence and not lost during shuffling. You can get around this by just prepending every integer sequence with the sequence label (eg, every sequence would be saved to the file as "{brightness value}, 24, 1, 5,..." and then you could just index out the first column after calling the `bucket_op`. Please reach out if you have questions on how to do this.
 
-# In[11]:
+# Now that we have the `bucket_op`, we can simply `sess.run()` it to get a correctly formatted batch
 
+# In[10]:
 
-# Now that we have the bucket_op, we can simply sess.run() it to get
-# a correctly formatted batch
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -151,19 +145,28 @@ print(batch.shape)
 
 # ## Training a top model and a top model + mLSTM.
 
-# In[12]:
+# First, obtain all of the ops needed to output a representation
+
+# In[11]:
 
 
 final_hidden, x_placeholder, batch_size_placeholder, seq_length_placeholder, initial_state_placeholder = (
     b.get_rep_ops())
 
 
-# In[13]:
+# `final_hidden` should be a batch_size x rep_dim matrix.
+# 
+# Lets say we want to train a basic feed-forward network as the top model, doing regression with MSE loss, and the Adam optimizer. We can do that by:
+# 
+# 1.  Defining a loss function.
+# 
+# 2.  Defining an optimizer that's only optimizing variables in the top model.
+# 
+# 3.  Minimizing the loss inside of a TensorFlow session
+
+# In[12]:
 
 
-# final_hidden should be a batch_size x rep_dim matrix
-# Lets say I want to train a basic feed-forward network as the top
-# model, doing regression with MSE loss, Adam optimizer
 y_placeholder = tf.placeholder(tf.float32, shape=[None,1], name="y")
 initializer = tf.contrib.layers.xavier_initializer(uniform=False)
 
@@ -175,8 +178,13 @@ with tf.variable_scope("top"):
     )
 
 loss = tf.losses.mean_squared_error(y_placeholder, prediction)
-    
-# You can specifically train the top model first
+
+
+# You can specifically train the top model first by isolating variables of the "top" scope, and forcing the optimizer to only optimize these.
+
+# In[13]:
+
+
 learning_rate=.001
 top_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="top")
 optimizer = tf.train.AdamOptimizer(learning_rate)
@@ -184,12 +192,11 @@ top_only_step_op = optimizer.minimize(loss, var_list=top_variables)
 all_step_op = optimizer.minimize(loss)
 
 
+# We next need to define a function that allows us to calculate the length each sequence in the batch so that we know what index to use to obtain the right "final" hidden state
+
 # In[14]:
 
 
-# Notice that one of the placeholder is seq_length_placeholder.
-# We need to compute the lengths of the sequences in each batch so
-# that we can index out the the correct final hidden.
 def nonpad_len(batch):
     nonzero = batch > 0
     lengths = np.sum(nonzero, axis=1)
@@ -198,10 +205,11 @@ def nonpad_len(batch):
 nonpad_len(batch)
 
 
+# We are ready to train. As an illustration, let's learn to predict the number 42 just optimizing the top model.
+
 # In[15]:
 
 
-# toy example where we learn to predict 42 just training the top
 y = [[42]]*batch_size
 num_iters = 10
 with tf.Session() as sess:
@@ -210,18 +218,19 @@ with tf.Session() as sess:
         batch = sess.run(bucket_op)
         length = nonpad_len(batch)
         loss_, __, = sess.run([loss, top_only_step_op],
-                             feed_dict={
-                                 x_placeholder: batch,
-                                 y_placeholder: y,
-                                 batch_size_placeholder: batch_size,
-                                 seq_length_placeholder:length,
-                                 initial_state_placeholder:b._zero_state
-                             }
-                             )
+                feed_dict={
+                     x_placeholder: batch,
+                     y_placeholder: y,
+                     batch_size_placeholder: batch_size,
+                     seq_length_placeholder:length,
+                     initial_state_placeholder:b._zero_state
+                }
+        )
+                  
         print("Iteration {0}: {1}".format(i, loss_))
 
 
-# Below we train both a top model and the mLSTM. This won't work on a 16G RAM laptop. Joint recurrent/ top model training has been tested on p3.2xlarge, which has 16G of GPU RAM and 64G of system RAM. To see a demonstration of joint training on your laptop, please run  unirep_tutorial_64_unit.ipynb, which is the same architecture and interface except for 64 hidden units in 4 stacked layers.
+# We can also jointly train the top model and the mLSTM. Note that if using the 1900-unit (full) model, you will need a GPU with at least 16GB RAM. To see a demonstration of joint training with fewer computational resources, please run this notebook using the 64-unit model.
 
 # In[16]:
 
@@ -234,13 +243,14 @@ with tf.Session() as sess:
         batch = sess.run(bucket_op)
         length = nonpad_len(batch)
         loss_, __, = sess.run([loss, all_step_op],
-                             feed_dict={
-                                 x_placeholder: batch,
-                                 y_placeholder: y,
-                                 batch_size_placeholder: batch_size,
-                                 seq_length_placeholder:length,
-                                 initial_state_placeholder:b._zero_state
-                             }
-                         )
+                feed_dict={
+                     x_placeholder: batch,
+                     y_placeholder: y,
+                     batch_size_placeholder: batch_size,
+                     seq_length_placeholder:length,
+                     initial_state_placeholder:b._zero_state
+                }
+        )
+        
         print("Iteration {0}: {1}".format(i,loss_))
 
