@@ -1,6 +1,6 @@
 # UniRep, a mLSTM "babbler" deep representation learner for protein engineering informatics.
 
-We present an interface for training, inferencing reprepresentations, generative modelling aka "babbling", and data management. All three architectures (64, 256, and 1900 units) are provided along with the trained architectures, random initializations used for evotuning (to ensure reproducibility) and the evotuned parameters.
+We present an interface for training, inferencing representations, generative modelling aka "babbling", and data management. All three architectures (64, 256, and 1900 units) are provided along with the trained architectures, the random initializations used to begin evotuning (to ensure reproducibility) and the evotuned parameters.
 
 ## Quick-start
 
@@ -28,14 +28,14 @@ aws s3 sync --no-sign-request --quiet s3://unirep-public/<weights_dir> <weights_
 
 where `<weights_dir>` is one of:
 
-- `1900_weights/`: weights for the 1900-unit (full) UniRep model
-- `256_weights/`: weights for the 256-unit UniRep model
-- `64_weights/`: weights for the 64-unit UniRep model
-- `1900_weights_random/`: weights for the randomly initialized Evotuned 1900-unit (full) UniRep model.
-- `256_weights_random/`: weights for the randomly initialized Evotuned 256-unit UniRep model.
-- `64_weights_random/`: weights for the randomly initialized Evotuned 64-unit UniRep model.
+- `1900_weights/`: trained weights for the 1900-unit (full) UniRep model
+- `256_weights/`: trained weights for the 256-unit UniRep model
+- `64_weights/`: trained weights for the 64-unit UniRep model
+- `1900_weights_random/`: random weights that were used to initialize the 1900-unit (full) UniRep model for Random Evotuned.
+- `256_weights_random/`: random weights that could be used to initialize the 256-unit UniRep model (e.g. for evotuning).
+- `64_weights_random/`: random weights that could be used to initialize the 64-unit UniRep model (e.g. for evotuning).
 - `evotuned/unirep/`: the weights, as a tensorflow checkpoint file, after 13k unsupervised weight updates on fluorescent protein homologs obtained with JackHMMer of the globally pre-trained UniRep (1900-unit model).
-- `evotuned/random_init/`: the weights, as a tensorflow checkpoint file, after 13k unsupervised weight updates on fluorescent protein homologs obtained with JackHMMer of a randomly initialized UniRep that was not pre-trained at all (1900-unit model).
+- `evotuned/random_init/`: the weights, as a tensorflow checkpoint file, after 13k unsupervised weight updates on fluorescent protein homologs obtained with JackHMMer of a randomly initialized UniRep (initialized with 1900_weights_random) that was not pre-trained at all (1900-unit model).
 
 
 ### Description of files in this repository
