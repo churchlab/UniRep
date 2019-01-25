@@ -20,13 +20,13 @@ First clone or fork this repository and navigate to the repository's top directo
 
 ### Obtaining weight files
 
-The `unirep_tutorial.ipynb` notebook downloads the needed weight files for the 64-unit and 1900-unit UniRep models. However, if you want to download these files directly, you first need `awscli` (the AWS Command Line Interface tool). If using the docker environments built above, it is included. If working outside docker, first do `pip install awscli`. To grab a set of weights, do:
+The `unirep_tutorial.ipynb` notebook downloads the needed weight files for the 64-unit and 1900-unit UniRep models. However, if you want to download these or other weight files directly, you first need `awscli` (the AWS Command Line Interface tool). If using the docker environments built above, it is included. If working outside docker, first do `pip install awscli`. To grab a set of weights, do:
 
 ```
 aws s3 sync --no-sign-request --quiet s3://unirep-public/<weights_dir> <weights_dir>
 ```
 
-where `<weight_dir>` is one of:
+where `<weights_dir>` is one of:
 
 - `1900_weights/`: weights for the 1900-unit (full) UniRep model
 - `256_weights/`: weights for the 256-unit UniRep model
@@ -40,7 +40,7 @@ where `<weight_dir>` is one of:
 
 ### Description of files in this repository
 - unirep_tutorial.ipynb - Start here for examples on loading the model, preparing data, training, and running inference. 
-- unirep.py Interface for most use cases.
-- custom_models.py Custom implementations of GRU, LSTM and mLSTM cells as used in representation training on UniRef50
-- data_utils.py Convenience functions for data management.
-- formatted and seqs.txt Tutorial files.
+- unirep.py - Interface for most use cases.
+- custom_models.py -  Custom implementations of GRU, LSTM and mLSTM cells as used in representation training on UniRef50
+- data_utils.py - Convenience functions for data management.
+- formatted.txt and seqs.txt - Tutorial files.
