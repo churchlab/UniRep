@@ -48,7 +48,7 @@ else:
 
 # ## Data formatting and management
 
-# Initialize the babbler. You need to provide the batch size you will use and the path to the weight directory.
+# Initialize UniRep, also referred to as the "babbler" in our code. You need to provide the batch size you will use and the path to the weight directory.
 
 # In[3]:
 
@@ -57,7 +57,7 @@ batch_size = 12
 b = babbler(batch_size=batch_size, model_path=MODEL_WEIGHT_PATH)
 
 
-# The babbler needs to receive data in the correct format, a (batch_size, max_seq_len) matrix with integer values, where the integers correspond to an amino acid label at that position, and the end of the sequence is padded with 0s until the max sequence length to form a non-ragged rectangular matrix. We provide a formatting function to translate a string of amino acids into a list of integers with the correct codex:
+# UniRep needs to receive data in the correct format, a (batch_size, max_seq_len) matrix with integer values, where the integers correspond to an amino acid label at that position, and the end of the sequence is padded with 0s until the max sequence length to form a non-ragged rectangular matrix. We provide a formatting function to translate a string of amino acids into a list of integers with the correct codex:
 
 # In[4]:
 
@@ -71,19 +71,21 @@ seq = "MRKGEELFTGVVPILVELDGDVNGHKFSVRGEGEGDATNGKLTLKFICTTGKLPVPWPTLVTTLTYGVQCFAR
 np.array(b.format_seq(seq))
 
 
-# We also provide a function that will check your Amino Acid sequences don't contain any characters which will break the UniRep model.
+# We also provide a function that will check your amino acid sequences don't contain any characters which will break the UniRep model.
 
-# In[6]:
+# In[7]:
 
 
 b.is_valid_seq(seq)
 
 
-# You could use your own data flow as long as you ensure that the data format is obeyed. Alternatively, you can use the data flow we've implemented for babbler training, which happens in the tensorflow graph. It reads from a file of integer sequences, shuffles them around, collects them into groups of similar length (to minimize padding waste) and pads them to the max_length. Here's how to do that:
+# You could use your own data flow as long as you ensure that the data format is obeyed. Alternatively, you can use the data flow we've implemented for UniRep training, which happens in the tensorflow graph. It reads from a file of integer sequences, shuffles them around, collects them into groups of similar length (to minimize padding waste) and pads them to the max_length. Here's how to do that:
 
-# First, sequences need to be saved in the correct format. Suppose we have a new-line seperated file of amino acid sequences, seqs.txt, and we want to format them. This can be done like so
+# First, sequences need to be saved in the correct format. Suppose we have a new-line seperated file of amino acid sequences, `seqs.txt`, and we want to format them. Note that training is currently only publicly supported for amino acid sequences less than 275 amino acids as gradient updates for sequences longer than that start to get unwieldy. If you want to train on sequences longer than this, please reach out to us. 
+# 
+# Sequence formatting can be done as follows:
 
-# In[7]:
+# In[8]:
 
 
 # Before you can train your model, 
@@ -91,36 +93,33 @@ with open("seqs.txt", "r") as source:
     with open("formatted.txt", "w") as destination:
         for i,seq in enumerate(source):
             seq = seq.strip()
-            if b.is_valid_seq(seq) and len(seq) < 275: ### PATCH ###
+            if b.is_valid_seq(seq) and len(seq) < 275: 
                 formatted = ",".join(map(str,b.format_seq(seq)))
                 destination.write(formatted)
                 destination.write('\n')
-            else:
-                pass
-                #raise ValueError("Sequence {0} is not a valid sequence.".format(i)) ### PATCH ### 
 
 
 # This is what the integer format looks like
 
-# In[8]:
+# In[9]:
 
 
 get_ipython().system('head -n1 formatted.txt')
 
 
-# Notice that by default format_seq does not include the stop symbol (25) at the end of the sequence. This is the correct behavior if you are trying to train a top model, but not if you are training a babbler.
+# Notice that by default format_seq does not include the stop symbol (25) at the end of the sequence. This is the correct behavior if you are trying to train a top model, but not if you are training UniRep representations.
 
-# Now we can use a custom function to bucket, batch and pad sequences from formatted.txt (which has the correct integer codex after calling `babbler.format_seq()`). The bucketing occurs in the graph. 
+# Now we can use a custom function to bucket, batch and pad sequences from `formatted.txt` (which has the correct integer codex after calling `babbler.format_seq()`). The bucketing occurs in the graph. 
 # 
 # What is bucketing? Specify a lower and upper bound, and interval. All sequences less than lower or greater than upper will be batched together. The interval defines the "sides" of buckets between these bounds. Don't pick a small interval for a small dataset because the function will just repeat a sequence if there are not enough to
 # fill a batch. All batches are the size you passed when initializing the babbler.
 # 
 # This is also doing a few other things:
-# - Shuffling the sequences by randomly sampling from a 10000 sequence buffer <span style="color:red">## Confirming 10K number is correct? ##</span>
+# - Shuffling the sequences by randomly sampling from a 10000 sequence buffer
 # - Automatically padding the sequences with zeros so the returned batch is a perfect rectangle
 # - Automatically repeating the dataset
 
-# In[9]:
+# In[10]:
 
 
 bucket_op = b.bucket_batch_pad("formatted.txt", interval=1000) # Large interval
@@ -130,7 +129,7 @@ bucket_op = b.bucket_batch_pad("formatted.txt", interval=1000) # Large interval
 
 # Now that we have the `bucket_op`, we can simply `sess.run()` it to get a correctly formatted batch
 
-# In[10]:
+# In[11]:
 
 
 with tf.Session() as sess:
@@ -147,7 +146,7 @@ print(batch.shape)
 
 # First, obtain all of the ops needed to output a representation
 
-# In[11]:
+# In[12]:
 
 
 final_hidden, x_placeholder, batch_size_placeholder, seq_length_placeholder, initial_state_placeholder = (
@@ -164,7 +163,7 @@ final_hidden, x_placeholder, batch_size_placeholder, seq_length_placeholder, ini
 # 
 # 3.  Minimizing the loss inside of a TensorFlow session
 
-# In[12]:
+# In[13]:
 
 
 y_placeholder = tf.placeholder(tf.float32, shape=[None,1], name="y")
@@ -182,7 +181,7 @@ loss = tf.losses.mean_squared_error(y_placeholder, prediction)
 
 # You can specifically train the top model first by isolating variables of the "top" scope, and forcing the optimizer to only optimize these.
 
-# In[13]:
+# In[14]:
 
 
 learning_rate=.001
@@ -194,7 +193,7 @@ all_step_op = optimizer.minimize(loss)
 
 # We next need to define a function that allows us to calculate the length each sequence in the batch so that we know what index to use to obtain the right "final" hidden state
 
-# In[14]:
+# In[15]:
 
 
 def nonpad_len(batch):
@@ -207,7 +206,7 @@ nonpad_len(batch)
 
 # We are ready to train. As an illustration, let's learn to predict the number 42 just optimizing the top model.
 
-# In[15]:
+# In[16]:
 
 
 y = [[42]]*batch_size
@@ -232,7 +231,7 @@ with tf.Session() as sess:
 
 # We can also jointly train the top model and the mLSTM. Note that if using the 1900-unit (full) model, you will need a GPU with at least 16GB RAM. To see a demonstration of joint training with fewer computational resources, please run this notebook using the 64-unit model.
 
-# In[16]:
+# In[17]:
 
 
 y = [[42]]*batch_size
