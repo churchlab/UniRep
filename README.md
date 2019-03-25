@@ -6,16 +6,15 @@ For training/finetuning: note that backpropagation of an mLSTM of this size is v
 
 ## Quick-start
 
-First clone or fork this repository and navigate to the repository's top directory (`cd UniRep`). We recommend developing with docker.
+First clone or fork this repository and navigate to the repository's top directory (`cd UniRep`). We recommend using our docker environments. Install [docker](https://www.docker.com/why-docker) to get started.
 
 ### CPU-only support
-0. You will need to install [docker](https://www.docker.com/why-docker) to get started.
 1. Build docker: `docker build -f docker/Dockerfile.cpu -t unirep-cpu .` This step pulls the Tensorflow 1.3 CPU image and installs a few required python packages. Note that Tensorflow pulls from Ubuntu 16.04.
 2. Run docker: `docker/run_cpu_docker.sh`. This will launch Jupyter. Copy and paste the provided URL into your browser. Note that if you are running this code on a remote machine you will need to set up port forwarding between your local machine and your remote machine. See this [example](https://coderwall.com/p/ohk6cg/remote-access-to-ipython-notebooks-via-ssh) (note that in our case jupyter is serving port 8888, not 8889 as the example describes).
 3. Open up the `unirep_tutorial.ipynb` notebook and get started. The 64-unit model should be OK to run on any machine. The full-sized model will require a machine with more than 16GB of RAM.
 
 ### GPU support
-0. System requirements: NVIDIA CUDA 8.0 (V8.0.61), NVIDIA cuDNN 6.0.21, NVIDIA GPU Driver 410.79 (though == 361.93 or >= 375.51 should work. Untested), nvidia-docker. We use the AWS [Deep Learning Base AMI for Ubuntu](https://aws.amazon.com/marketplace/pp/B077GCZ4GR), which has these requirements pre-configured. 
+0. System requirements: NVIDIA CUDA 8.0 (V8.0.61), NVIDIA cuDNN 6.0.21, NVIDIA GPU Driver 410.79 (though == 361.93 or >= 375.51 should work. Untested), nvidia-docker. We use the AWS [Deep Learning Base AMI for Ubuntu](https://aws.amazon.com/marketplace/pp/B077GCZ4GR) (tested on version 17.0 ami-0ff00f007c727c376), which has these requirements pre-configured. 
 1. Build docker: `docker build -f docker/Dockerfile.gpu -t unirep-gpu .` This step pulls the Tensorflow 1.3 GPU image and installs a few required python packages. Note that Tensorflow pulls from Ubuntu 16.04.
 2. Run docker: `docker/run_gpu_docker.sh`. This will launch Jupyter. Copy and paste the provided URL into your browser. Note that if you are running this code on a remote machine you will need to set up port forwarding between your local machine and your remote machine. See this [example](https://coderwall.com/p/ohk6cg/remote-access-to-ipython-notebooks-via-ssh) (note that in our case jupyter is serving port 8888, not 8889 as the example describes).
 3. Open up the `unirep_tutorial.ipynb` notebook and get started. The 64-unit model should be OK to run on any machine. The full-sized model will require a machine with more than 16GB of GPU RAM.
