@@ -46,3 +46,7 @@ where `<weights_dir>` is one of:
 - custom_models.py -  Custom implementations of GRU, LSTM and mLSTM cells as used in representation training on UniRef50
 - data_utils.py - Convenience functions for data management.
 - formatted.txt and seqs.txt - Tutorial files.
+
+# License
+The code in this repository is licensed under the terms of [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html).
+All the model weights are licensed under the terms of [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).
