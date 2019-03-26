@@ -48,6 +48,8 @@ where `<weights_dir>` is one of:
 - formatted.txt and seqs.txt - Tutorial files.
 
 # License
+Copyright 2018, 2019 Ethan Alley, Grigory Khimulya, Surojit Biswas
+
 The code in this repository is licensed under the terms of [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html).
 
 All the model weights are licensed under the terms of [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).
