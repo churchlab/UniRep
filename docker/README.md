@@ -3,7 +3,7 @@
 ## Build Docker image for GPU machine.
 
 
-Run from root mlpe-gfp-pilot directory
+Run from root UniRep directory
 
     $ docker build -f docker/Dockerfile.gpu -t unirep-gpu .
 
