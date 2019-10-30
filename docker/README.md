@@ -13,3 +13,9 @@ Run from root UniRep directory
 
 # Start Docker machine
 From repository root, run `docker/run_cpu_docker.sh`
+
+# On GPU
+`docker/run_gpu_docker.sh`
+
+# On GPU, with docker version < 19.03
+`docker/run_gpe_docker_DEPRECATED.sh`
