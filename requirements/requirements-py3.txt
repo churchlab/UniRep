@@ -1,4 +1,4 @@
 awscli==1.16.90
-numpy==1.15.4
+numpy==1.22.0
 pandas==0.23.4
 jupyter==1.0.0
